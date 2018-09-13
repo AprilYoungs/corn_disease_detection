@@ -1,4 +1,5 @@
 import torch.nn as nn
+import torchvision.models as models
 
 class ClassifiCNN(nn.Module):
     def __init__(self, class_size):
@@ -13,6 +14,8 @@ class ClassifiCNN(nn.Module):
     
     def forward(self, images):
         features = self.densenet(images)
+        # the output size is x * 2208 * 7 * 7
+        features =  nn.AvgPool2d(7)(features)
         features = features.view(features.size(0), -1)
         features = self.fc(features)
         return features
