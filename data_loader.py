@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import random
 import os
+import sys
 
 
 def get_loader(transform, class_size=61, mode='train', batch_size=1, data_path='data'):
@@ -27,6 +28,60 @@ def get_loader(transform, class_size=61, mode='train', batch_size=1, data_path='
                                   shuffle=True)
     
     return data_loader
+
+
+def get_encoder_loader(transform, encoder, class_size=61, mode='train', batch_size=1, data_path='data'):
+    """Return a data loader that contain only embedding images"""
+    
+    assert mode in ['train', 'test'], "mode must be one of 'train' or 'test'"
+    if mode == 'train':
+        img_folder = os.path.join(data_path, '2018_trainingset_20180905/AgriculturalDisease_trainingset/images/')
+        notation_file = os.path.join(data_path, '2018_trainingset_20180905/AgriculturalDisease_trainingset/AgriculturalDisease_train_annotations.json')
+    if mode == 'test':
+        img_folder = os.path.join(data_path, '2018_validationset_20180905/AgriculturalDisease_validationset/images/')
+        notation_file = os.path.join(data_path, '2018_validationset_20180905/AgriculturalDisease_validationset/AgriculturalDisease_validation_annotations.json')
+    
+    dataset = EncoderSet(transform, encoder, class_size, notation_file, img_folder, batch_size)
+    
+
+    data_loader = data.DataLoader(dataset=dataset,
+                                  batch_size=dataset.batch_size,
+                                  shuffle=True)
+    
+    return data_loader
+    
+    
+class EncoderSet(data.Dataset):
+    def __init__(self, transforms, encoder, class_size, json_file, root_dir, batch_size):
+        self.refer = pd.read_json(json_file)
+        self.root_dir = root_dir
+        self.transform = transforms
+        self.encoder = encoder
+        self.class_size = class_size
+        self.batch_size = batch_size
+        self.embeddings = []
+        self.encode_data()
+        
+    def encode_data(self):
+        total = len(self.refer)
+        for idx in range(len(self.refer)):
+            image_path = os.path.join(self.root_dir, self.refer.iloc[idx, 1])
+            image = Image.open(image_path).convert("RGB")
+            image = self.transform(image).unsqueeze(0).to(encoder.device)
+            embed = self.encoder(image)
+            self.embeddings.append(embed)
+            print('\r'+"encoding {}/{}->{:.2f}%".format(idx, total, 100*idx/total), end='')
+            sys.stdout.flush()
+        
+    def __len__(self):
+        return len(self.refer)
+    
+    def __getitem__(self, idx):
+        return self.embeddings[idx], self.refer.iloc[idx, 0]
+    
+    def get_train_indices(self):
+        indices = list(np.random.choice(np.arange(len(self.refer)), size=self.batch_size))
+        return indices
     
     
     
@@ -39,6 +94,7 @@ class ClassifySet(data.Dataset):
         self.batch_size = batch_size
         self.class_size = class_size
         
+        
     def __len__(self):
         return len(self.refer)
     
@@ -47,10 +103,6 @@ class ClassifySet(data.Dataset):
         image_path = os.path.join(self.root_dir, self.refer.iloc[idx, 1])
         image = Image.open(image_path).convert("RGB")
         
-#         y = np.zeros(self.class_size)
-#         y[self.refer.iloc[idx, 0]] = 1
-        
-#         y = torch.from_numpy(y)
         
         return self.transform(image), self.refer.iloc[idx, 0]
     
@@ -58,3 +110,4 @@ class ClassifySet(data.Dataset):
         indices = list(np.random.choice(np.arange(len(self.refer)), size=self.batch_size))
         return indices
     
+ 
