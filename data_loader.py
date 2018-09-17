@@ -64,13 +64,12 @@ class EncoderSet(data.Dataset):
             self.embeddings = []
             self.encode_data(device)
         else:
-            self.embedding = torch.load(file)
+            self.embeddings = torch.load(file)
         
     def encode_data(self, device):
         total = len(self.refer)
         start_time = time.time()
-#         for idx in range(len(self.refer)):
-        for idx in range(32):
+        for idx in range(len(self.refer)):
             image_path = os.path.join(self.root_dir, self.refer.iloc[idx, 1])
             image = Image.open(image_path).convert("RGB")
             image = self.transform(image).unsqueeze(0).to(device)

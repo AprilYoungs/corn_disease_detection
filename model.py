@@ -24,4 +24,4 @@ class FinalClassify(nn.Module):
     
     def forward(self, features):
         y = self.fc(features)
-        return features
+        return y
