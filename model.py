@@ -24,4 +24,17 @@ class FinalClassify(nn.Module):
     
     def forward(self, features):
         y = self.fc(features)
+        y = nn.Softmax()(y)
+        return y
+    
+
+class MultiClassify(nn.Module):
+    def __init__(self, in_features, class_size):
+        super(MultiClassify, self).__init__()
+        self.fc1 = nn.Linear(in_features, in_features//3)
+        self.fc2 = nn.Linear(in_features//3, class_size)
+    
+    def forward(self, features):
+        y = self.fc1(features)
+        y = self.fc2(y)
         return y
