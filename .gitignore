@@ -3,6 +3,7 @@ __pycache__
 .ipynb_checkpoints
 2018_trainingset_20180905
 2018_testA_20180905
+resnet152_valid_bad.h
 resnet152_train.h
 models/
 !models/class_model_50.pkl

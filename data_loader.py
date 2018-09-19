@@ -12,11 +12,11 @@ import sys
 def get_loader(transform, class_size=61, mode='train', batch_size=1, data_path='data'):
     """Return a data loader"""
     
-    assert mode in ['train', 'test'], "mode must be one of 'train' or 'test'"
+    assert mode in ['train', 'valid', 'test'], "mode must be one of 'train' or 'test'"
     if mode == 'train':
         img_folder = os.path.join(data_path, '2018_trainingset_20180905/AgriculturalDisease_trainingset/images/')
         notation_file = os.path.join(data_path, '2018_trainingset_20180905/AgriculturalDisease_trainingset/AgriculturalDisease_train_annotations.json')
-    if mode == 'test':
+    if mode == 'valid':
         img_folder = os.path.join(data_path, '2018_validationset_20180905/AgriculturalDisease_validationset/images/')
         notation_file = os.path.join(data_path, '2018_validationset_20180905/AgriculturalDisease_validationset/AgriculturalDisease_validation_annotations.json')
     
@@ -34,11 +34,11 @@ def get_loader(transform, class_size=61, mode='train', batch_size=1, data_path='
 def get_encoder_loader(transform, encoder, device, class_size=61, mode='train', batch_size=1, data_path='data', file=None):
     """Return a data loader that contain only embedding images"""
     
-    assert mode in ['train', 'test'], "mode must be one of 'train' or 'test'"
+    assert mode in ['train', 'valid', 'test'], "mode must be one of 'train' or 'test'"
     if mode == 'train':
         img_folder = os.path.join(data_path, '2018_trainingset_20180905/AgriculturalDisease_trainingset/images/')
         notation_file = os.path.join(data_path, '2018_trainingset_20180905/AgriculturalDisease_trainingset/AgriculturalDisease_train_annotations.json')
-    if mode == 'test':
+    if mode == 'valid':
         img_folder = os.path.join(data_path, '2018_validationset_20180905/AgriculturalDisease_validationset/images/')
         notation_file = os.path.join(data_path, '2018_validationset_20180905/AgriculturalDisease_validationset/AgriculturalDisease_validation_annotations.json')
     
