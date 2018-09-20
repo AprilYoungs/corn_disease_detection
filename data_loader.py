@@ -7,12 +7,13 @@ import time
 import random
 import os
 import sys
+import glob
 
 
 def get_loader(transform, class_size=61, mode='train', batch_size=1, data_path='data'):
     """Return a data loader"""
     
-    assert mode in ['train', 'valid', 'test'], "mode must be one of 'train' or 'test'"
+    assert mode in ['train', 'valid'], "mode must be one of 'train' or 'valid'"
     if mode == 'train':
         img_folder = os.path.join(data_path, '2018_trainingset_20180905/AgriculturalDisease_trainingset/images/')
         notation_file = os.path.join(data_path, '2018_trainingset_20180905/AgriculturalDisease_trainingset/AgriculturalDisease_train_annotations.json')
@@ -34,7 +35,7 @@ def get_loader(transform, class_size=61, mode='train', batch_size=1, data_path='
 def get_encoder_loader(transform, encoder, device, class_size=61, mode='train', batch_size=1, data_path='data', file=None):
     """Return a data loader that contain only embedding images"""
     
-    assert mode in ['train', 'valid', 'test'], "mode must be one of 'train' or 'test'"
+    assert mode in ['train', 'valid'], "mode must be one of 'train' or 'valid'"
     if mode == 'train':
         img_folder = os.path.join(data_path, '2018_trainingset_20180905/AgriculturalDisease_trainingset/images/')
         notation_file = os.path.join(data_path, '2018_trainingset_20180905/AgriculturalDisease_trainingset/AgriculturalDisease_train_annotations.json')
@@ -50,8 +51,9 @@ def get_encoder_loader(transform, encoder, device, class_size=61, mode='train', 
                                   shuffle=True)
     
     return data_loader
-    
-    
+
+
+
 class EncoderSet(data.Dataset):
     def __init__(self, transforms, encoder, device, class_size, json_file, root_dir, batch_size, file=None):
         self.refer = pd.read_json(json_file)
@@ -122,4 +124,22 @@ class ClassifySet(data.Dataset):
         indices = list(np.random.choice(np.arange(len(self.refer)), size=self.batch_size))
         return indices
     
- 
+def get_test_data(transform, encoder, device):
+    """ Return the datas to generate test result """
+    path = './data/2018_testA_20180905/AgriculturalDisease_testA/images/*'
+    images = glob.glob(path)
+    start_time = time.time()
+    total = len(images)
+    dataSet = []
+    for idx in range(total):
+        image_path = images[idx]
+        image = Image.open(image_path).convert("RGB")
+        image = transform(image).unsqueeze(0).to(device)
+        embed = encoder(image)
+        img_id = image_path.split('/')[-1]
+        dataSet.append((embed, img_id))
+        spent_time = time.time() - start_time
+        spent_time = "%d:%2.2f" % (spent_time//60, spent_time%60)
+        print('\r'+"encoding {}/{}->{:.2f}%, spent_time:{}".format(idx, total, 100*idx/total, spent_time), end='')
+        sys.stdout.flush()
+    return dataSet
