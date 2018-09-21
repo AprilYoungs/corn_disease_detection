@@ -24,7 +24,6 @@ class FinalClassify(nn.Module):
     
     def forward(self, features):
         y = self.fc(features)
-        y = nn.Softmax()(y)
         return y
     
 
