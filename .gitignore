@@ -5,5 +5,6 @@ __pycache__
 2018_testA_20180905
 resnet152_valid_bad.h
 resnet152_train.h
+resnet152_train_no_crop.h
 models/
 !models/class_model_50.pkl
