@@ -15,6 +15,42 @@ class Encoder(nn.Module):
         features = self.resnet(images)
         features = features.view(features.size(0), -1)
         return features
+
+class EncoderCut(nn.Module):
+    """remove the last conv network"""
+    def __init__(self):
+        super(EncoderCut, self).__init__()
+        resnet = models.resnet152(pretrained=True)
+        for param in resnet.parameters():
+            param.requires_grad_(False)
+        
+        modules = list(resnet.children())[:-3]
+        self.resnet = nn.Sequential(*modules)
+        self.pool = nn.AvgPool2d(14)
+        
+    def forward(self, images):
+        features = self.resnet(images)
+        features = self.pool(features)
+        features = features.view(features.size(0), -1)
+        return features
+
+class EncoderCut2Layer(nn.Module):
+    """remove the last 2 conv network"""
+    def __init__(self):
+        super(EncoderCut2Layer, self).__init__()
+        resnet = models.resnet152(pretrained=True)
+        for param in resnet.parameters():
+            param.requires_grad_(False)
+        
+        modules = list(resnet.children())[:-4]
+        self.resnet = nn.Sequential(*modules)
+        self.pool = nn.AvgPool2d(28)
+        
+    def forward(self, images):
+        features = self.resnet(images)
+        features = self.pool(features)
+        features = features.view(features.size(0), -1)
+        return features
     
 
 class FinalClassify(nn.Module):

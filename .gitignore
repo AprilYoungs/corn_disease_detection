@@ -7,4 +7,5 @@ resnet152_valid_bad.h
 resnet152_train.h
 resnet152_train_no_crop.h
 models/
+bottle_neck/
 !models/class_model_50.pkl
