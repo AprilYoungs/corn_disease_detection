@@ -100,6 +100,7 @@ class ConvClassify(nn.Module):
     
     def forward(self, features):
         y = self.conv(features)
+        y = self.pool(y)
         y = y.view(y.size(0), -1)
         y = self.fc(y)
         return y

@@ -113,7 +113,7 @@ class EncoderSeparateSet(data.Dataset):
             
                                
     def __len__(self):
-        return len(self.refer)
+        return len(self.indexs)
     
     def __getitem__(self, idx):
         embed = self.indexs['embed'][idx]
