@@ -23,8 +23,6 @@ def get_loader(transform, mode='train', batch_size=1, data_path='data'):
     
     dataset = ClassifySet(transform, notation_file, img_folder, batch_size)
     
-#     if mode == 'train':
-#         indices = dataset.get_train_indices()
     data_loader = data.DataLoader(dataset=dataset,
                                   batch_size=dataset.batch_size,
                                   shuffle=True)
@@ -66,7 +64,7 @@ def get_encoder_loader_fold(transform, encoder, device, fileFold, load=False, mo
         img_folder = os.path.join(data_path, '2018_validationset_20180905/AgriculturalDisease_validationset/images/')
         notation_file = os.path.join(data_path, '2018_validationset_20180905/AgriculturalDisease_validationset/AgriculturalDisease_validation_annotations.json')
     
-    dataset = EncoderSeparateSet(transform, encoder, device, notation_file, notation_file, batch_size, fileFold, load=load)
+    dataset = EncoderSeparateSet(transform, encoder, device, notation_file, img_folder, batch_size, fileFold, load=load)
     
     data_loader = data.DataLoader(dataset=dataset,
                                   batch_size=dataset.batch_size,
@@ -85,13 +83,16 @@ class EncoderSeparateSet(data.Dataset):
         self.encoder = encoder
         self.batch_size = batch_size
         self.fileFold = fileFold
-        
-        self.indexs = 
+  
         
         if load == True:
+            self.embeddings = []
             self.encode_data(device)
+            self.indexs = self.refer.copy()
+            self.indexs['embed'] = self.embeddings
+            self.indexs.to_csv(os.path.join(self.fileFold, 'indexs.csv'), index=False)
         else:
-            
+            self.indexs = pd.read_csv(os.path.join(self.fileFold, 'indexs.csv'))
 
         
     def encode_data(self, device):
@@ -102,22 +103,22 @@ class EncoderSeparateSet(data.Dataset):
             image = Image.open(image_path).convert("RGB")
             image = self.transform(image).unsqueeze(0).to(device)
             embed = self.encoder(image)
-            embed_path = os.path.join(self.fileFold, '{}.pkl'.format(idx)
+            embed_path = os.path.join(self.fileFold, '{}.pkl'.format(idx))
             torch.save(embed, embed_path)
+            self.embeddings.append(embed_path)
             spent_time = time.time() - start_time
             spent_time = "%d:%2.2f" % (spent_time//60, spent_time%60)
             print('\r'+"encoding {}/{}->{:.2f}%, spent_time:{}".format(idx, total, 100*idx/total, spent_time), end='')
             sys.stdout.flush()
             
-    def save_to(self, file):
-        """Save the encoded tensor to a specific file"""
-        torch.save(self.embeddings, file)
-        
+                               
     def __len__(self):
         return len(self.refer)
     
     def __getitem__(self, idx):
-        return self.embeddings[idx], self.refer.iloc[idx, 0]
+        embed = self.indexs['embed'][idx]
+        embed = torch.load(embed)
+        return embed, self.indexs['disease_class'][idx]
     
     def get_train_indices(self):
         indices = list(np.random.choice(np.arange(len(self.refer)), size=self.batch_size))
