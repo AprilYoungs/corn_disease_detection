@@ -1,8 +1,7 @@
 .DS_Store
 __pycache__
 .ipynb_checkpoints
-2018_trainingset_20180905
-2018_testA_20180905
+data/
 resnet152_valid_bad.h
 resnet152_train.h
 resnet152_train_no_crop.h
