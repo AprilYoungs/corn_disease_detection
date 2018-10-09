@@ -21,7 +21,7 @@ def get_loader(transform, mode='train', batch_size=1, data_path='data'):
         img_folder = os.path.join(data_path, '2018_validationset_20180905/AgriculturalDisease_validationset/images/')
         notation_file = os.path.join(data_path, '2018_validationset_20180905/AgriculturalDisease_validationset/AgriculturalDisease_validation_annotations.json')
     
-    dataset = ClassifySet(transform, notation_file, img_folder, batch_size)
+    dataset = ClassifySet(transform, 1000, notation_file, img_folder, batch_size)
     
     data_loader = data.DataLoader(dataset=dataset,
                                   batch_size=dataset.batch_size,
